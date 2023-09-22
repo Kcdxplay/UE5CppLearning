@@ -9,6 +9,9 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UAnimMontage;
+class USInteractionComponent;
+class USAttributeComponent;
 
 
 UCLASS()
@@ -18,19 +21,37 @@ class UE5CPPLEARNING_API ASCharacter : public ACharacter
 
 
 protected:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> ProjectileClass;
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TArray< TSubclassOf<AActor>> ProjectileClasses;
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackAnim;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Attack");
+	UParticleSystem* AttackEffect;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
+
+	int CurrentProjectileIndex = 0;
 
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
 protected:
+
+	virtual void PostInitializeComponents() override;
+
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
-		
+	
+	UPROPERTY(VisibleAnywhere, Category = "Components");
+	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Components")
+	USAttributeComponent* AttributeComp;	
 
 
 	// Called when the game starts or when spawned
@@ -40,6 +61,14 @@ protected:
 	void MoveRight(float value);
 
 	void PrimaryAttack();
+	void PrimaryAttack_TimeElapsed();
+	void PrimaryBlackHole();
+	void PrimaryTeleport();
+	void PrimaryInteract();
+
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComop,float NewHealth, float Delta);
 
 public:	
 	// Called every frame
